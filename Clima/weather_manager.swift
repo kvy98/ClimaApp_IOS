@@ -10,8 +10,12 @@ import Foundation
 struct WeatherManager {
     let apikey="fbbcc431bd1f209d9a022cf7459e2aae"
     let endpoint="https:api.openweathermap.org/data/2.5/weather"
+    func escape(string: String) -> String {
+        let allowedCharacters = string.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: ":=\"#%/<>?@\\^`{|} ").inverted) ?? ""
+        return allowedCharacters
+    }
     func performRequestByCityname(cityName:String,delegate:WeatherViewDelegate) {
-        let url=URL(string: "\(endpoint)?q=\(cityName)&appid=\(apikey)&units=metric")
+        let url=URL(string: "\(endpoint)?q=\(escape(string: cityName))&appid=\(apikey)&units=metric")
         performRequest(delegate: delegate, url: url)
     }
     func performRequestByCordinator(lon:Double?,lat:Double?,delegate:WeatherViewDelegate)  {
@@ -43,8 +47,7 @@ struct WeatherManager {
         }
         let jsonDecode=JSONDecoder()
         do{
-            let weather=try jsonDecode.decode(WeatherData.self, from: data!)
-            return weather
+            return try jsonDecode.decode(WeatherData.self, from: data!)
         }
         catch{
             print(error)
